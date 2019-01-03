@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html lang="pl" ng-app="BulbApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BULB - TA Interface</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--- <link rel="stylesheet" href="fa/css/font-awesome.min.css"> --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="css/list.css">
+    <link rel="stylesheet" href="css/datepicker.css">
+    <link rel="stylesheet" href="css/form-handler.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/loader.css">
+
+    <link rel="stylesheet" href="css/summary-table.css">
+
+
+
+    <script src="js/jq-custom-script.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+
+    <script src="sp/easysharepoint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
+    <script src="sp/dbRest.js"></script>
+    <script src="js/addItemToSharePoint.js"></script>
+    <script src="js/vendor.js"></script>
+
+
+    <script>
+        setTimeout(function() {
+            $("#loader1").show();
+        }, 1);
+        currentUserSP = loadUser();
+        statuses = loadStatuses();
+        times = loadWorkingHours();
+        presenceCodes = loadPresenceCodes();
+        nationalHolidays = loadNationalHolidays();
+        $.when(loadRequests("TimeAdmin", currentUserSP.ID)).done(function(data) {
+            requests = data;
+        });
+
+        specialRequests = loadSpecialRequests("TimeAdmin", currentUserSP.ID);
+
+        // due to fact that there's some problem with init page loading...
+        // globalRefresh();
+
+    </script>
+
+</head>
+
+<body>
+    <div id="loader1" class="loader"></div>
+
+    <div class="header-info-small">
+        No support for this resolution of the browser!
+    </div>
+
+
+    <!--NAVIGATION-->
+
+
+
+    <div id="myNavbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+                </button>
+            </div>
+
+
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="#home"> <span class="fa fa-home fa-3x"></span> </a></li>
+                    <li><a href="#list"><span class="fa fa-list-ul fa-3x"></span></a> </li>
+                    <li><a href="#special-list"><span class="fa fa-user-secret fa-3x"></span></a></li>
+                    <li></li>
+                    <li><a href="#help"><span class="fa fa-question fa-3x"></span></a> </li>
+                    <li></li>
+                    <li><a href="#" onclick="globalRefresh();"> <span class="fas fa-sync fa-3x"></span> </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!--- End Navigation ---->
+    <!--- Header --->
+    <div id="home" class="header" ng-controller="HeaderCtrl">
+        <div class="container" id="glider-start">
+            <div class="row">
+                <div class="col-lg-6 col-md-6">
+                    <div id="glider-gear">
+
+                    </div>
+
+
+                    <h1 id="h1-app-title">{{appDetails.title}} - TA Interface <span class="fa fa-paper-plane"></span></h1>
+                    <p>
+                        {{appDetails.tagline}}
+                    </p>
+
+                    <div id="hr-logo">
+                        <a href="ecok.html" target="_blank"><img src="img/hrslogo.png" alt="hrslogo"></a>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="container bulb-right-quick-panel">
+
+                        <a class="btn btn-lg btn-warning" target="_blank" rel="noopener noreferrer" href="https://share.opel.com/sites/ovso2/SOE_Gliwice/Support/wbnch/Lists/Requests/AllItems.aspx">RAW</a>
+                        <br>
+                        <a class="btn btn-lg btn-primary" target="_blank" rel="noopener noreferrer" href="https://share.opel.com/sites/ovso2/SOE_Gliwice/Support/wbnch/_layouts/15/start.aspx#/Lists/National%20Holidays/AllItems.aspx">
+                            Holidays
+                        </a>
+                        <br>
+                        <a class="btn btn-lg btn-danger" target="_blank" rel="noopener noreferrer" href="https://share.opel.com/sites/ovso2/SOE_Gliwice/Support/wbnch/_layouts/15/start.aspx#/Lists/Presence%20Codes/AllItems.aspx">
+                            Presence Codes
+                        </a>
+                        <br>
+                        <a class="btn btn-lg btn-success" target="_blank" rel="noopener noreferrer" href="https://share.opel.com/sites/ovso2/SOE_Gliwice/Support/wbnch/_layouts/15/start.aspx#/Lists/Working%20Hours/AllItems.aspx">
+                            Working Hours
+                        </a>
+                        <br>
+                        <a class="btn btn-lg btn-info" target="_blank" rel="noopener noreferrer" href="https://share.opel.com/sites/ovso2/SOE_Gliwice/Support/wbnch/_layouts/15/start.aspx#/Lists/Emplyoee%20Details/AllItems.aspx">
+                            Detale pracowników
+                        </a>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="list" class="list" ng-controller="ListCtrl">
+
+        <h2>{{ll.titleTA}} <i class="fa fa-list-ul"></i></h2>
+
+        <ul class="lista">
+
+            <li>
+                <button id="list-show-more" ng-click="showMore()" class="btn btn-secondary"> <i class="fas fa-sort-amount-up"></i> Pokaż starsze... </button>
+            </li>
+
+
+            <li ng-repeat="item in ll.leanArrForTA">
+                <div class="list-user-name">{{item.CreatedByName}}</div>
+                <div class="list-ajtem">{{covertCodeToSAPCode(item.RequestCodeSAP)}}</div>
+                <div class="item-description">{{covertCodeToDescription(item.RequestCodeSAP)}}</div><br>
+                <div class="item-status">Status: {{strStatus(item.Status)}}</div>
+                <div class="item-ajdi">id: {{item.ID}}</div>
+                <div class="time-t1">Start: {{item.StartDate.replace("Z","").replace("T"," T ")}}</div>
+                <div class="time-t2">Koniec: {{item.EndDate.replace("Z","").replace("T"," T ")}}</div>
+                <div class="item-reason">Opis: {{item.Reason}}</div>
+            </li>
+
+        </ul>
+    </div>
+
+    <div id="special-list" class="special-list" ng-controller="SpecialListCtrl">
+
+        <h2>{{sl.titleTA}} <i class="fa fa-user-secret"></i></h2>
+
+        <ul class="lista-specjalna">
+
+            <li>
+                <button id="special-list-show-more" ng-click="showMore()" class="btn btn-secondary"> <i class="fas fa-sort-amount-up"></i> Pokaż starsze... </button>
+            </li>
+
+            <li ng-repeat="item in sl.specialRequestsLean">
+                <div class="special-item-title">{{item.Title}}</div>
+                <div class="special-item-description">Opis problemu: {{item.Description}}</div>
+                <div class="special-item-by-name">Twórca: {{item.CreatedByName}}</div>
+                <div class="special-item-edited-by-name">Edytor: {{item.EditedByName}}</div>
+            </li>
+
+        </ul>
+    </div>
+
+    <div id="help" class="help" ng-controller="HelpCtrl">
+        <h2>
+            {{h.title}} <span class="fa fa-life-ring"></span>
+        </h2>
+
+        <div class="container help-it-guys">
+            <ul>
+                <li ng-repeat="item in h.itGuys">
+                    <div class="nm">{{item.name}}</div>
+                    <div class="mail">{{item.mail}} <a href="mailto:{{item.mail}}?Subject=OVT.Bulb.Support.Ticket"><span class="fa fa-envelope"></span></a></div>
+                    <div class="phone">{{item.phone}}</div>
+                    <div class="mobile">{{item.mobile}}</div>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+
+    <script src="js/onload-ta.js"></script>
+    
+    
+    <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
+    <script src="js/angular-animate.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/ng-comp/ng-head-foot/head-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/startup-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/shared-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/ta-special-list-ctrl.js"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,169 @@
+﻿.list h2 {
+    padding-bottom: 60px;
+    color: black;
+}
+
+
+.list ul,
+.list ul li {
+    display: block;
+    position: relative;
+
+}
+
+
+.list .a-d-list {
+    text-align: right;
+    width: 1100px;
+    padding: 40px;
+    padding-top: 10px;
+}
+
+
+
+.list ul li {
+    width: 1030px;
+    border: 1px solid dimgray;
+    border-collapse: collapse;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 10px;
+}
+
+.list ul .li-green {
+    background-color: lightgreen;
+}
+
+.list ul .li-red {
+    background-color: pink;
+}
+
+
+.list ul li:hover {
+    font-weight: bold;
+}
+
+.list ul li div {
+    display: inline;
+    padding: 2px;
+    margin: 4%;
+    width: 90%;
+
+}
+
+.list ul li .list-user-name {
+
+    font-size: 20px;
+    color: black;
+
+    position: absolute;
+    top: -40px;
+    left: 0px;
+}
+
+
+.list ul li .list-ajtem {
+    font-size: 26px;
+    color: black;
+    text-decoration: underline;
+
+    position: absolute;
+    top: -20px;
+    left: -30px;
+}
+
+.list ul li .item-description {
+    font-size: 19px;
+    position: absolute;
+    top: -40px;
+    left: 200px;
+}
+
+.list ul li .item-status {
+    font-size: 14px;
+    position: absolute;
+    top: -34px;
+    left: 440px;
+}
+
+.list ul li .item-ajdi {
+    position: absolute;
+    top: -10px;
+    left: 100px;
+}
+
+.list ul li .time-t1 {
+    position: absolute;
+    top: -10px;
+    left: 200px;
+}
+
+
+.list ul li .time-t2 {
+    position: absolute;
+    top: -10px;
+    left: 400px;
+}
+
+.list ul li .item-reason {
+	position: absolute;
+	top: 14px;
+	left: 80px;
+	font-size: 10px;
+	width: 80%;
+}
+
+
+.list ul li .btns-for-supervisor {
+    position: absolute;
+    top: 30px;
+    left: 800px;
+    border: 2px solid gray;
+    border-radius: 8px;
+    padding: 4px;
+    margin: 1px;
+    width: 200px;
+}
+
+
+.special-list ul,
+.special-list ul li {
+    display: block;
+    position: relative;
+
+}
+
+.special-list ul li {
+    padding: 40px;
+    border: 2px solid gray;
+    border-radius: 8px;
+}
+
+.special-list ul li div {
+    position: absolute;
+}
+
+.special-list .special-item-title {
+    font-size: 200%;
+    top: 6px;
+    left: 20px;
+    color: black;
+}
+
+.special-list .special-item-description {
+    font-size: 110%;
+    top: 40px;
+    left: 80px;
+}
+
+.special-list .special-item-by-name {
+    font-size: 120%;
+    left: 400px;
+    top: 8px;
+}
+
+.special-list .special-item-edited-by-name {
+    font-size: 120%;
+    left: 700px;
+    top: 8px;
+}

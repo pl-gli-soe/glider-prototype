@@ -1,0 +1,207 @@
+﻿<!DOCTYPE html>
+<html lang="pl" ng-app="BulbApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BULB - LANDING PAGE</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--- <link rel="stylesheet" href="fa/css/font-awesome.min.css"> --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="css/list.css">
+    <link rel="stylesheet" href="css/datepicker.css">
+    <link rel="stylesheet" href="css/form-handler.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/loader.css">
+
+    <link rel="stylesheet" href="css/summary-table.css">
+
+
+
+    <script src="js/jq-custom-script.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+
+    <script src="sp/easysharepoint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
+    <script src="sp/dbRest.js"></script>
+    <script src="js/addItemToSharePoint.js"></script>
+    <script src="js/vendor.js"></script>
+
+
+    <script>
+    	setTimeout(function(){ $("#loader1").show(); }, 1);
+        currentUserSP = loadUser();
+        //$("#loader1").hide();
+
+        document.getElementsByTagName("html")[0].style.visibility = "visible";
+        setTimeout(function(){ $("#loader1").hide(); }, 500);
+
+    </script>
+
+    <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
+    <script src="js/angular-animate.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/ng-comp/ng-head-foot/head-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/startup-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/shared-ctrl.js"></script>
+</head>
+
+<body>
+
+    <!--- LOADERS !!! --->
+    <!-- <div id="loader1" class="loader"></div> -->
+    <!--- end of LOADERS --->
+
+
+    <!--- STARTUP INFO IN MODAL --->
+    <div class="container">
+
+        <div class="modal fade" id="modal-startup" ng-controller="StartupCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h3 class="modal-title">{{startup.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{startup.body}}
+                        </p>
+                        <p>
+                            {{startup.version}}
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-success" ng-click="agreeAndGo()" data-dismiss="modal"> {{startup.agree}} </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="header-info-small">
+        No support for this resolution of the browser!
+    </div>
+
+
+    <!--NAVIGATION-->
+
+
+
+    <div id="myNavbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+            </div>
+
+
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="#home"> <span class="fa fa-home fa-3x"></span> </a></li>
+                    <li></li>
+                    <li><a href="#help"><span class="fa fa-question fa-3x"></span></a> </li>
+                    <li></li>
+                    <li><a href="#" onclick="globalRefresh();"> <span class="fas fa-sync fa-3x"></span> </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!--- End Navigation ---->
+
+    <!--- Header --->
+    <div id="home" class="header" ng-controller="HeaderCtrl">
+        <div class="container" id="glider-start">
+            <div class="row">
+                <div class="col-lg-6 col-md-6">
+                    <div id="glider-gear">
+
+                    </div>
+
+
+                    <h1 id="h1-app-title">{{appDetails.title}} <span class="fa fa-paper-plane"></span></h1>
+                    <p>
+                        {{appDetails.tagline}}
+                    </p>
+
+                    <div id="hr-logo">
+                        <a href="ecok.html" target="_blank"><img src="img/hrslogo.png" alt="hrslogo"></a>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="container bulb-right-quick-panel">
+
+                        <button class="btn btn-lg btn-danger" data-toggle="modal" data-target="#modal-startup"><i class="fas fa-lock fa-3x"></i> <h2>{{appDetails.rodo}}</h2></button>
+                        <h4>
+                            {{appDetails.shortcut}}
+                        </h4>
+
+                        <a class="btn btn-lg btn-success" target="_blank" rel="noopener noreferrer" href="employee.html">
+                            Dla pracownika
+                        </a>
+                        <br>
+                        <a class="btn btn-lg btn-info" target="_blank" rel="noopener noreferrer" href="supervisor.html">
+                            Dla przełożonego
+                        </a>
+                        <br>
+                        <a class="btn btn-lg btn-primary" target="_blank" rel="noopener noreferrer" href="ta.html">
+                            Dla TA
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <div id="help" class="help" ng-controller="HelpCtrl">
+        <h2>
+            {{h.title}} <span class="fa fa-life-ring"></span>
+        </h2>
+
+        <div class="container help-it-guys">
+            <ul>
+                <li ng-repeat="item in h.itGuys">
+                    <div class="nm">{{item.name}}</div>
+                    <div class="mail">{{item.mail}} <a href="mailto:{{item.mail}}?Subject=OVT.Bulb.Support.Ticket"><span class="fa fa-envelope"></span></a></div>
+                    <div class="phone">{{item.phone}}</div>
+                    <div class="mobile">{{item.mobile}}</div>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+
+    <script src="js/timeline-vendor.js"></script>
+    <script src="js/date-picker-handler.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
+    <!-- <script src="js/onload-ta.js"></script> -->
+
+
+</body>
+
+</html>

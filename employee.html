@@ -1,0 +1,863 @@
+﻿<!DOCTYPE html>
+<html lang="pl" ng-app="BulbApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BULB EMPLOYEE</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--- <link rel="stylesheet" href="fa/css/font-awesome.min.css"> --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="css/list.css">
+    <link rel="stylesheet" href="css/datepicker.css">
+    <link rel="stylesheet" href="css/form-handler.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/loader.css">
+
+    <link rel="stylesheet" href="css/summary-table.css">
+
+
+
+    <script src="js/jq-custom-script.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+
+    <script src="sp/easysharepoint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
+    <script src="sp/dbRest.js"></script>
+    <script src="js/addItemToSharePoint.js"></script>
+    <script src="js/vendor.js"></script>
+
+
+    <script>
+        setTimeout(function() {
+            $("#loader1").show();
+        }, 1);
+        currentUserSP = loadUser();
+        statuses = loadStatuses();
+        times = loadWorkingHours();
+        presenceCodes = loadPresenceCodes();
+        nationalHolidays = loadNationalHolidays();
+
+        $.when(loadRequests("Author", currentUserSP.ID)).done(function(data) {
+            requests = data;
+        });
+    </script>
+</head>
+
+<body>
+
+    <!--- LOADERS !!! --->
+    <div id="loader1" class="loader"></div>
+    <!--- end of LOADERS --->
+
+
+    <!--- STARTUP INFO IN MODAL --->
+    <div class="container">
+
+        <div class="modal fade" id="modal-startup" ng-controller="StartupCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h3 class="modal-title">{{startup.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{startup.body}}
+                        </p>
+                        <p>
+                            {{startup.version}}
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" class="btn btn-success" ng-click="agreeAndGo()" data-dismiss="modal"> {{startup.agree}} </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="container">
+
+        <div class="modal fade" id="modal-config-request" ng-controller="ConfigRequestCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="modal-header">
+                        <h3 class="modal-title">{{cr.title}}</h3>
+                    </div>
+
+                    <div class="modal-body">
+                        <ul>
+                            <li class="defualt-schedule">Standardowy harmonogram czasu pracy ID: {{cr.defSchedule}}, Harmonogram: {{cr.getFromTimes(cr.defSchedule)}} </li>
+                            <li class="mon-schedule">Harmonogram PN: {{cr.monSchedule}}, Harmonogram: {{cr.getFromTimes(cr.monSchedule)}}</li>
+                            <li class="tue-schedule">Harmonogram WT: {{cr.tueSchedule}}, Harmonogram: {{cr.getFromTimes(cr.tueSchedule)}}</li>
+                            <li class="wed-schedule">Harmonogram ŚR: {{cr.wedSchedule}}, Harmonogram: {{cr.getFromTimes(cr.wedSchedule)}}</li>
+                            <li class="thu-schedule">Harmonogram CZW: {{cr.thuSchedule}}, Harmonogram: {{cr.getFromTimes(cr.thuSchedule)}}</li>
+                            <li class="fri-schedule">Harmonogram PT: {{cr.friSchedule}}, Harmonogram: {{cr.getFromTimes(cr.friSchedule)}}</li>
+                            <!-- <li class="approver">Kto aktualnie zatwierdza Twoje wnioski: {{cr.approver}}</li> -->
+                        </ul>
+
+                        <button ng-click="changeSchedule()" class="btn btn-primary change-schedule-btn">Zmień</button>
+
+                        <div ng-if="v" class="inner-modal-body">
+                            <ul>
+                                <li class="defualt-schedule">
+                                    Stary Standardowy harmonogram czasu pracy: {{cr.getFromTimes(cr.defSchedule)}}, nowy:
+                                    <select id="select-time-def" ng-model="valformselDef" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in cr.tt" value="{{item.ID}}">{{item.Start + " - " + item.End}}</option>
+                                    </select>
+                                </li>
+                                <li class="mon-schedule">
+                                    Stary Harmonogram PN: {{cr.getFromTimes(cr.monSchedule)}}, nowy:
+                                    <select id="select-time-mon" ng-model="valformselMon" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in cr.tt" value="{{item.ID}}">{{item.Start + " - " + item.End}}</option>
+                                    </select>
+                                </li>
+                                <li class="tue-schedule">
+                                    Stary Harmonogram WT: {{cr.getFromTimes(cr.tueSchedule)}}, nowy:
+                                    <select id="select-time-tue" ng-model="valformselTue" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in cr.tt" value="{{item.ID}}">{{item.Start + " - " + item.End}}</option>
+                                    </select>
+                                </li>
+                                <li class="wed-schedule">
+                                    Stary Harmonogram ŚR: {{cr.getFromTimes(cr.wedSchedule)}}, nowy:
+                                    <select id="select-time-wed" ng-model="valformselWed" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in cr.tt" value="{{item.ID}}">{{item.Start + " - " + item.End}}</option>
+                                    </select>
+                                </li>
+                                <li class="thu-schedule">
+                                    Stary Harmonogram CZW: {{cr.getFromTimes(cr.thuSchedule)}}, nowy:
+                                    <select id="select-time-thu" ng-model="valformselThu" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in cr.tt" value="{{item.ID}}">{{item.Start + " - " + item.End}}</option>
+                                    </select>
+                                </li>
+                                <li class="fri-schedule">
+                                    Stary Harmonogram PT: {{cr.getFromTimes(cr.friSchedule)}}, nowy:
+                                    <select id="select-time-fri" ng-model="valformselFri" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in cr.tt" value="{{item.ID}}">{{item.Start + " - " + item.End}}</option>
+                                    </select>
+                                </li>
+                                <!-- <li class="approver">Kto aktualnie zatwierdza Twoje wnioski: {{cr.approver}}</li> -->
+                            </ul>
+
+                            <button ng-click="submitNewSchedule()" class="btn btn-danger change-schedule-btn">Potwierdź</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modal-new-request" ng-controller="AddNewRequestCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="modal-header">
+                        <h3 class="modal-title">{{nr.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{nr.body}}
+                        </p>
+                        
+                        <!--
+
+                        <div class="container">
+                            <h4>
+                                Sekcja szybkiego wyboru
+                            </h4>
+                            <div class="grupa-szybkich-guzikow">
+
+                                <div class="btn-group" role="group" aria-label="Quick">
+                                    <button ng-click="quickButtonClicked(guzik)" ng-repeat="guzik in nr.guziki" type="button" class="btn btn-info">{{guzik}}</button>
+                                </div>
+
+                            </div>
+                        </div>
+                        
+                        -->
+
+
+                        <div class="container">
+                            <br> --------------------------------------
+                        </div>
+
+
+                        <div class="container">
+
+                            <div class="row">
+                                <div class="col-lg-6 col-md-10">
+                                    <div class="form-group">
+                                        <label for="">Jaki wniosek: </label>
+                                        <select id="select-request-type" ng-model="valformsel" class="custom-select custom-select-lg" ng-change="addNewSelectClicked()">
+                                            <option ng-repeat="item in nr.plans" value="{{item.ID}}">{{item.Description}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                            	<div class="btn-group add-new-req-quick-buttons-for-hours" role="group" aria-label="Quick2">
+                            		<!-- <button class="btn btn-light" disabled>OD: </button> -->
+                                    <button ng-click="quickButtonClickedAddHalf1()" type="button" class="btn btn-success">(+0,5)</button>
+                                    <button ng-click="quickButtonClickedAdd1()" type="button" class="btn btn-success">(+1,0)</button>
+                                    <button class="btn btn-light kreska" ng-click="setToOneAgain()"> - </button>
+                                    <button ng-click="quickButtonClickedRemoveHalf1()" type="button" class="btn btn-danger">(-0,5)</button>
+                                    <button ng-click="quickButtonClickedRemove1()" type="button" class="btn btn-danger">(-1,0)</button>
+                                    <!--
+                            		<button class="btn btn-light" disabled>DO: </button>
+                                    <button ng-click="quickButtonClickedAddHalf2()" type="button" class="btn btn-success">(+0,5)</button>
+                                    <button ng-click="quickButtonClickedAdd2()" type="button" class="btn btn-success">(+1,0)</button>
+                                    <button ng-click="quickButtonClickedRemoveHalf2()" type="button" class="btn btn-danger">(-0,5)</button>
+                                    <button ng-click="quickButtonClickedRemove2()" type="button" class="btn btn-danger">(-1,0)</button>
+                                    -->
+                                    <button class="btn btn-light" disabled> ILE GODZIN: </button>
+                                    <button class="btn btn-info kreska" ng-click="setToOneAgain()" ng-model="nr.howManyHoursToChange"> {{ nr.howManyHoursToChange }}  </button>
+                                    <button class="btn btn-primary kreska" ng-click="switchControlsOnDates()"> <span class="fas fa-random"></span>  </button>
+                                    <button class="btn btn-light desc" disabled> {{ nr.koniecCzyPoczatekCzasuPracy }}</button>
+
+                                </div>
+                                
+                                <br>
+                                
+								<div class="btn-group add-new-req-quick-buttons-for-days" role="group" aria-label="Quick3">
+                                    <button ng-click="quickButtonClickedAddDay()" type="button" class="btn btn-success">(+1 dzień)</button>
+                                    <button ng-click="quickButtonClickedAddSeven()" type="button" class="btn btn-success">(+7 dni)</button>
+                                    <button class="btn btn-light kreska" ng-click="setToOneDayAgain()"> - </button>
+                                    <button ng-click="quickButtonClickedRemoveDay()" type="button" class="btn btn-danger">(-1 dzień)</button>
+                                    <button ng-click="quickButtonClickedRemoveSeven()" type="button" class="btn btn-danger">(-7 dni)</button>
+                                    <!--
+                            		<button class="btn btn-light" disabled>DO: </button>
+                                    <button ng-click="quickButtonClickedAddHalf2()" type="button" class="btn btn-success">(+0,5)</button>
+                                    <button ng-click="quickButtonClickedAdd2()" type="button" class="btn btn-success">(+1,0)</button>
+                                    <button ng-click="quickButtonClickedRemoveHalf2()" type="button" class="btn btn-danger">(-0,5)</button>
+                                    <button ng-click="quickButtonClickedRemove2()" type="button" class="btn btn-danger">(-1,0)</button>
+                                    -->
+                                    <button class="btn btn-light" disabled> ILE DNI: </button>
+                                    <button class="btn btn-info kreska" ng-click="setToOneDayAgain()" ng-model="nr.howManyDaysToChange"> {{ nr.howManyDaysToChange + 1 }}  </button>
+                                </div>
+
+
+                            </div>
+
+                            <div class="my-container-for-datetimepicker">
+                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                    <div class="form-group">
+                                        <div class="input-group date" id="datetimepicker1">
+                                            <input type="text" class="form-control" id="input-datetimepicker1" disabled>
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar" disabled></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                    <div class="form-group">
+                                        <div class="input-group date" id="datetimepicker2">
+                                            <input type="text" class="form-control" id="input-datetimepicker2" disabled>
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar" disabled></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container">
+                            <div class="col-lg-4 col-md-6 col-sm-8">
+                                <div class="form-group">
+                                    <label for="">Powód wniosku: </label>
+                                    <textarea id="new-request-textarea-reason" name="reason-nowego-wniosku" id="" cols="50" rows="3"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" ng-click="wyslijWniosekDoAkceptacji()" class="btn btn-success" data-dismiss="modal">Wyślij wniosek do akceptacji</a>
+                        <a href="#" class="btn btn-default" data-dismiss="modal">Zamknij</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal fade" id="modal-ticket-request" ng-controller="AddTicketRequestCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="modal-header">
+                        <h3 class="modal-title">{{tr.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{tr.body}}
+                        </p>
+
+                        <div class="row">
+                            <div class="col-lg-6 col-md-10">
+                                <div class="form-group">
+                                    <label for="">Wybierz problematyczny wniosek: </label>
+                                    <select ng-model="TicketRequest" id="select-request-type" ng-model="valformsel" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in tr.srr" value="{{item.ID}}">{{item.ID + " - [" + item.nm + "]: (" + item.d1 + ") (" + item.d2 + ")"}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container">
+                            <div class="col-lg-6 col-md-8 col-sm-12">
+                                <div class="form-group">
+                                    <label for="">Opisz sytuacje problematycznego wniosku: </label>
+                                    <textarea ng-model="TicketText" id="new-request-textarea-reason" name="reason-ticketu-wniosku" cols="100" rows="6"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" ng-click="wyslijTicket()" class="btn btn-success" data-dismiss="modal">Wyślij info do Admina</a>
+                        <a href="#" class="btn btn-default" data-dismiss="modal">Zamknij</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal fade" id="modal-special-request" ng-controller="AddSpecialRequestCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="modal-header">
+                        <h3 class="modal-title">{{sr.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{sr.body}}
+                        </p>
+
+                        <div class="container">
+                            <div class="col-lg-4 col-md-6 col-sm-8">
+                                <div class="form-group">
+                                    <label for="">Opisz sytuacje wniosku specjalnego: </label>
+                                    <textarea ng-model="SRText" id="new-request-textarea-reason" name="reason-nowego-wniosku" id="" cols="100" rows="6"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" ng-click="wyslijSpecialWniosekDoAkceptacji()" class="btn btn-success" data-dismiss="modal">Wyślij specjalny wniosek do akceptacji</a>
+                        <a href="#" class="btn btn-default" data-dismiss="modal">Zamknij</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="modal fade" id="modal-edit-request" ng-controller="EditRequestCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h3 class="modal-title">{{er.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+
+
+                        <div class="container">
+
+                            <div class="row">
+                                <div class="col-lg-10 col-md-12">
+                                    <div class="form-group">
+
+
+                                        <div id="edit-req-ctrl-label">
+                                            <!-- AUTO GENERATED CONTENT -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="my-container">
+                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                    <div class="form-group">
+                                        <div class="input-group date" id="edatetimepicker1">
+                                            <input type="text" class="form-control" id="input-edatetimepicker1" disabled>
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                    <div class="form-group">
+                                        <div class="input-group date" id="edatetimepicker2">
+                                            <input type="text" class="form-control" id="input-edatetimepicker2" disabled>
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-calendar"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            <div class="container">
+                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                    <div class="form-group">
+                                        <label for="">Dodatkowy komentarz do zmiany: </label>
+                                        <br>
+                                        <textarea ng-model="ertr" id="edit-request-textarea-reason" name="reason-edytowanego-wniosku" cols="50" rows="3"></textarea>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <a href="#" ng-click="deleteThisRequest()" class="btn btn-warning" data-dismiss="modal">Usuń ten wniosek</a>
+                        <a href="#" ng-click="editThisRequest()" class="btn btn-success" data-dismiss="modal">Edytuj wniosek i ponownie wyślij do akceptacji</a>
+                        <a href="#" class="btn btn-default" data-dismiss="modal">Zamknij</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="modal fade" id="modal-from-calendar" ng-controller="ModalFromCalendarCtrl">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h3 class="modal-title">{{mfc.title}}</h3>
+                    </div>
+                    <div class="modal-body">
+                        <p id="mfc-body">
+                            {{mfc.body}}
+                        </p>
+
+
+                        <div class="container">
+                            <div class="list-for-modal-from-caledar-day"></div>
+                            <button ng-click="getDateFromThisModal()" data-dismiss="modal" class="btn btn-success" data-toggle="modal" data-target="#modal-new-request">Dodaj nowy</button>
+                            <button data-dismiss="modal" class="btn btn-primary" data-toggle="modal" data-target="#modal-edit-request" ng-click="setEditedRequest()">Edytuj wybrany z listy powyżej</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="" class="btn btn-default" data-dismiss="modal">Close</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-info-small">
+        No support for this resolution of the browser!
+    </div>
+
+
+    <!--NAVIGATION-->
+
+
+
+    <div id="myNavbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</button>
+            </div>
+
+
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="#home"> <span class="fa fa-home fa-3x"></span> </a></li>
+                    <li><a href="#calendar"><span class="fa fa-calendar fa-3x"></span> </a></li>
+                    <li><a href="#timeline"><span class="fa fa-clock fa-3x"></span></a> </li>
+                    <li><a href="#summary"><span class="fas fa-file-alt fa-3x"></span></a> </li>
+                    <li><a href="#list"><span class="fa fa-list-ul fa-3x"></span></a> </li>
+                    <li></li>
+                    <li><a href="#help"><span class="fa fa-question fa-3x"></span></a> </li>
+                    <li></li>
+                    <li><a href="#"> <span class="fas fa-user-cog fa-3x" data-toggle="modal" data-target="#modal-config-request"></span> </a></li>
+                    <li></li>
+                    <li><a href="#" onclick="globalRefresh();"> <span class="fas fa-sync fa-3x"></span> </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!--- End Navigation ---->
+
+    <!--- Header --->
+    <div id="home" class="header" ng-controller="HeaderCtrl">
+        <div class="container" id="glider-start">
+            <div class="row">
+                <div class="col-lg-6 col-md-6">
+                    <div id="glider-gear">
+
+                    </div>
+
+
+                    <h1 id="h1-app-title">{{appDetails.title}} <span class="fa fa-paper-plane"></span></h1>
+                    <p>
+                        {{appDetails.tagline}}
+                    </p>
+
+                    <div id="hr-logo">
+                        <a href="ecok.html" target="_blank"><img src="img/hrslogo.png" alt="hrslogo"></a>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="container bulb-right-quick-panel">
+
+                        <button class="btn btn-lg btn-danger" data-toggle="modal" data-target="#modal-startup"><i class="fas fa-lock fa-3x"></i> <h2>{{appDetails.rodo}}</h2></button>
+                        <h4>
+                            {{appDetails.shortcut}}
+                        </h4>
+
+                        <button class="btn btn-lg btn-info" data-toggle="modal" data-target="#modal-new-request"><i class="fas fa-plus"></i> Dodaj nowy wniosek </button>
+                        <br>
+                        <button class="btn btn-lg btn-warning" data-toggle="modal" data-target="#modal-special-request"><i class="fas fa-plus"></i> Dodaj specjalny wniosek </button>
+                        <br>
+                        <button class="btn btn-lg btn-danger" data-toggle="modal" data-target="#modal-ticket-request"><i class="fas fa-plus"></i> Zgłoś problem z już istniejącym wnioskiem </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="calendar" class="calendar" ng-controller="CalendarCtrl">
+        <h2><span class="fa fa-calendar"></span> {{c.title}} </h2>
+
+
+        <!--- GO BACK BUTTOn --->
+        <!--- <button class="btn btn-lg btn-primary" ng-click="goBack()"><i class="fas fa-angle-double-up"></i></button> --->
+
+        <div ng-model="arrForModel" class="container inner-calendar-based-on-jquery-ui">
+            <div id="myDatePicker"></div>
+        </div>
+    </div>
+
+
+    <div id="timeline" class="timeline" ng-controller="TimelineCtrl">
+        <h2>
+            {{t.title}} <span class="fas fa-project-diagram"></span>
+        </h2>
+
+        <!--- <button class="btn btn-lg btn-primary" ng-click="goBack()"><i class="fas fa-angle-double-up"></i></button> --->
+        <!--- main container for timeline --->
+
+        <div class="bulb-timeline">
+
+            <button id="timeline-show-more" class="btn btn-lg btn-secondary show-more-button" ng-click="showMore()">
+                <i class="fas fa-sort-amount-up"></i> 
+                Pokaż więcej... 
+            </button>
+            <button class="btn btn-lg btn-info add-button" data-toggle="modal" data-target="#modal-new-request"><i class="fas fa-plus"></i> Dodaj nowy wniosek</button>
+            <br>
+
+            <!--- <button id="testtesttest" class="btn btn-lg btn-primary" ng-click="someAction()"><i class="fas fa-plus"></i> GUZIK </button> --->
+
+            <ul>
+                <li ng-repeat="item in takeLastData(sorted(aa.arr, []), aa.howMany)" ng-click="timelineLi(item)" class="bulb-timeline-sz-{{aa.szerokosc(item)}}">
+                    <span></span>
+                    <div class="first">SAP code: {{covertCodeToSAPCode(item.RequestCodeSAP)}}, {{covertCodeToDescription(item.RequestCodeSAP)}}, ID: {{item.ID}}</div>
+                    <div class="second">Status: <b>{{strStatus(item.Status)}}</b>; ( {{item.StartDate.replace("T", " ").replace(":00Z", "")}} - {{item.EndDate.replace("T", " ").replace(":00Z", "")}} ) </div>
+                    <div class="third">{{item.StartDate.split("T")[0]}}</div>
+                    <div class="time">
+                        <span class="t1">{{item.StartDate.split("T").pop().replace("Z","")}}</span>
+                        <span class="t2">{{item.EndDate.split("T").pop().replace("Z","")}}</span>
+                    </div>
+                    <div class="fourth">{{item.EndDate.split("T")[0]}}</div>
+                </li>
+            </ul>
+        </div>
+
+
+
+    </div>
+
+
+    <div id="summary" class="summary" ng-controller="SummaryCtrl">
+        <h2>
+            {{s.title}} <span class="fa fa-eye"></span>
+        </h2>
+        
+        
+        <div class="container">
+        	<table>
+        		<tr>
+        		
+        			<td class="td-layout-in-summary">
+			        	<div><u>Tylko zaakceptowane: </u></div>
+			            <div id="current-month-overtime">Nadgodziny bieżącego miesiąca: {{rep.currentMonthOvertime}}</div>
+			            <div id="current-overtime">Nadgodziny dla bieżącego okresu rozliczeniowego: {{rep.currentOvertime}}</div>
+			            <div id="current-month-ho">Wykorzystane HO w tym miesiącu: {{rep.currentHomeOffice}}</div>
+        			</td>
+
+        		
+        			<td class="td-layout-in-summary">
+			        	<div><u>Wszystkie: </u></div>
+			            <div id="current-month-overtime">Nadgodziny bieżącego miesiąca: {{rep.currentPreMonthOvertime}}</div>
+			            <div id="current-overtime">Nadgodziny dla bieżącego okresu rozliczeniowego: {{rep.currentPreOvertime}}</div>
+			            <div id="current-month-ho">Wykorzystane HO w tym miesiącu: {{rep.currentPreHomeOffice}}</div>
+        			</td>
+        			
+        		</tr>
+        	</table>
+
+        </div>
+
+
+        <div class="container">
+
+
+            <div class="table100 ver1 m-b-110">
+                <table data-vertable="ver1">
+                    <thead>
+                        <tr class="row100 head">
+                            <th class="column100 column1" data-column="column1"></th>
+                            <th class="column100 column2" data-column="column2">HH:MM</th>
+                            <th class="column100 column3" data-column="column3"></th>
+                            <th class="column100 column4" data-column="column4">HH:MM</th>
+                            <th class="column100 column5" data-column="column5"></th>
+                            <th class="column100 column6" data-column="column6">DNI</th>
+                            <th class="column100 column7" data-column="column7"></th>
+                            <th class="column100 column8" data-column="column8">DNI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1"></td>
+                            <td class="column100 column2" data-column="column2"></td>
+                            <td class="column100 column3" data-column="column3"></td>
+                            <td class="column100 column4" data-column="column4"></td>
+                            <td class="column100 column5" data-column="column5">Urlop (M)</td>
+                            <td class="column100 column6" data-column="column6">{{rep.currMonthHolidays}}</td>
+                            <td class="column100 column7" data-column="column7">Urlop+ (M)</td>
+                            <td class="column100 column8" data-column="column8">{{rep.currPreMonthHolidays}}</td>
+                        </tr>
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1"></td>
+                            <td class="column100 column2" data-column="column2"></td>
+                            <td class="column100 column3" data-column="column3"></td>
+                            <td class="column100 column4" data-column="column4"></td>
+                            <td class="column100 column5" data-column="column5">Urlop (Y)</td>
+                            <td class="column100 column6" data-column="column6">{{rep.holidays}}</td>
+                            <td class="column100 column7" data-column="column7">Urlop+ (Y)</td>
+                            <td class="column100 column8" data-column="column8">{{rep.preHolidays}}</td>
+                        </tr>
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1"></td>
+                            <td class="column100 column2" data-column="column2"></td>
+                            <td class="column100 column3" data-column="column3"></td>
+                            <td class="column100 column4" data-column="column4"></td>
+                            <td class="column100 column5" data-column="column5">HO (M)</td>
+                            <td class="column100 column6" data-column="column6">{{rep.currentHomeOffice}}</td>
+                            <td class="column100 column7" data-column="column7">HO+ (M)</td>
+                            <td class="column100 column8" data-column="column8">{{rep.currentPreHomeOffice}}</td>
+                        </tr>
+
+                        <!--<tr class="row100">
+                            <td class="column100 column1" data-column="column1">--</td>
+                            <td class="column100 column2" data-column="column2">--</td>
+                            <td class="column100 column3" data-column="column3">--</td>
+                            <td class="column100 column4" data-column="column4">--</td>
+                            <td class="column100 column5" data-column="column5">HO <br>(ten rok)</td>
+                            <td class="column100 column6" data-column="column6">0</td>
+                            <td class="column100 column7" data-column="column7">HO <br>(ten rok bez akceptacji)</td>
+                            <td class="column100 column8" data-column="column8">+ 0</td>
+                        </tr>-->
+
+
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">OVT (M)</td>
+                            <td class="column100 column2" data-column="column2">{{rep.currentMonthOvertime}}</td>
+                            <td class="column100 column3" data-column="column3">OVT+ (M)</td>
+                            <td class="column100 column4" data-column="column4">{{rep.currentPreMonthOvertime}}</td>
+                            <td class="column100 column5" data-column="column5"></td>
+                            <td class="column100 column6" data-column="column6"></td>
+                            <td class="column100 column7" data-column="column7"></td>
+                            <td class="column100 column8" data-column="column8"></td>
+                        </tr>
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">OVT (O)</td>
+                            <td class="column100 column2" data-column="column2">{{rep.currentOkresOvertime}}</td>
+                            <td class="column100 column3" data-column="column3">OVT+ (O)</td>
+                            <td class="column100 column4" data-column="column4">{{rep.currentPreOkresOvertime}}</td>
+                            <td class="column100 column5" data-column="column5"></td>
+                            <td class="column100 column6" data-column="column6"></td>
+                            <td class="column100 column7" data-column="column7"></td>
+                            <td class="column100 column8" data-column="column8"></td>
+                        </tr>
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">OVT (Y)</td>
+                            <td class="column100 column2" data-column="column2">{{rep.currentOvertime}}</td>
+                            <td class="column100 column3" data-column="column3">OVT+ (Y)</td>
+                            <td class="column100 column4" data-column="column4">{{rep.currentPreOvertime}}</td>
+                            <td class="column100 column5" data-column="column5"></td>
+                            <td class="column100 column6" data-column="column6"></td>
+                            <td class="column100 column7" data-column="column7"></td>
+                            <td class="column100 column8" data-column="column8"></td>
+                        </tr>
+
+<!--
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">Nadgodziny <br>(ten miesiąc)</td>
+                            <td class="column100 column2" data-column="column2">00:00</td>
+                            <td class="column100 column3" data-column="column3">Odebrane</td>
+                            <td class="column100 column4" data-column="column4">00:00</td>
+                            <td class="column100 column5" data-column="column5">Wypłacone</td>
+                            <td class="column100 column6" data-column="column6">00:00</td>
+                            <td class="column100 column7" data-column="column7">--</td>
+                            <td class="column100 column8" data-column="column8">--</td>
+                        </tr>
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">Nadgodziny <br>(ten okres rozliczeniowy)</td>
+                            <td class="column100 column2" data-column="column2">00:00</td>
+                            <td class="column100 column3" data-column="column3">Odebrane</td>
+                            <td class="column100 column4" data-column="column4">00:00</td>
+                            <td class="column100 column5" data-column="column5">Wypłacone</td>
+                            <td class="column100 column6" data-column="column6">00:00</td>
+                            <td class="column100 column7" data-column="column7">--</td>
+                            <td class="column100 column8" data-column="column8">--</td>
+                        </tr>
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">Nadgodziny <br>(ten rok)</td>
+                            <td class="column100 column2" data-column="column2">00:00</td>
+                            <td class="column100 column3" data-column="column3">Odebrane</td>
+                            <td class="column100 column4" data-column="column4">00:00</td>
+                            <td class="column100 column5" data-column="column5">Wypłacone</td>
+                            <td class="column100 column6" data-column="column6">00:00</td>
+                            <td class="column100 column7" data-column="column7">--</td>
+                            <td class="column100 column8" data-column="column8">--</td>
+                        </tr>
+-->
+
+
+                        <tr class="row100">
+                            <td class="column100 column1" data-column="column1">Opieka nad dzieckiem <br>(godziny)</td>
+                            <td class="column100 column2" data-column="column2">{{rep.opiekaH}}</td>
+                            <td class="column100 column3" data-column="column3"></td>
+                            <td class="column100 column4" data-column="column4"></td>
+                            <td class="column100 column5" data-column="column5">Opieka nad dzieckiem <br>(dni)</td>
+                            <td class="column100 column6" data-column="column6">{{rep.opiekaD}}</td>
+                            <td class="column100 column7" data-column="column7"></td>
+                            <td class="column100 column8" data-column="column8"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+    <div id="list" class="list" ng-controller="ListCtrl">
+
+        <h2>{{ll.title}} <i class="fa fa-list-ul"></i></h2>
+
+        <ul class="lista">
+
+            <li>
+                <button id="list-show-more" ng-click="showMore()" class="btn btn-secondary"> <i class="fas fa-sort-amount-up"></i> Pokaż starsze... </button>
+            </li>
+
+
+            <li ng-repeat="item in ll.leanArrForEmployee">
+                <div class="list-ajtem">{{covertCodeToSAPCode(item.RequestCodeSAP)}}</div>
+                <div class="item-description">{{covertCodeToDescription(item.RequestCodeSAP)}}</div><br>
+                <div class="item-status">Status: {{strStatus(item.Status)}}</div>
+                <div class="item-ajdi">id: {{item.ID}}</div>
+                <div class="time-t1">Start: {{item.StartDate.replace("Z","").replace("T"," T ")}}</div>
+                <div class="time-t2">Koniec: {{item.EndDate.replace("Z","").replace("T"," T ")}}</div>
+                <div class="item-reason">Opis: {{item.Reason}}</div>
+            </li>
+
+        </ul>
+    </div>
+
+    <div id="help" class="help" ng-controller="HelpCtrl">
+        <h2>
+            {{h.title}} <span class="fa fa-life-ring"></span>
+        </h2>
+
+        <div class="container help-it-guys">
+            <ul>
+                <li ng-repeat="item in h.itGuys">
+                    <div class="nm">{{item.name}}</div>
+                    <div class="mail">{{item.mail}} <a href="mailto:{{item.mail}}?Subject=OVT.Bulb.Support.Ticket"><span class="fa fa-envelope"></span></a></div>
+                    <div class="phone">{{item.phone}}</div>
+                    <div class="mobile">{{item.mobile}}</div>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+
+    <script src="js/timeline-vendor.js"></script>
+    <script src="js/date-picker-handler.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-datetimepicker.min.js"></script>
+    <script src="js/onload-main.js"></script>
+
+    <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
+    <script src="js/angular-animate.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script src="js/ng-comp/ng-head-foot/head-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/startup-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/shared-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/summary-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/employee-timeline-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/employee-add-new-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/employee-edit-ctrl.js"></script>
+</body>
+
+</html>

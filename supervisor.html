@@ -1,0 +1,370 @@
+﻿<!DOCTYPE html>
+<html lang="pl" ng-app="BulbApp">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BULB - Approver Interface</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!--- <link rel="stylesheet" href="fa/css/font-awesome.min.css"> --->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/timeline.css">
+    <link rel="stylesheet" href="css/list.css">
+    <link rel="stylesheet" href="css/datepicker.css">
+    <link rel="stylesheet" href="css/form-handler.css">
+    <link rel="stylesheet" href="css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="css/loader.css">
+
+    <link rel="stylesheet" href="css/summary-table.css">
+
+
+
+    <script src="js/jq-custom-script.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+
+    <script src="sp/easysharepoint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.SPServices/2014.02/jquery.SPServices-2014.02.min.js"></script>
+    <script src="sp/dbRest.js"></script>
+    <script src="js/addItemToSharePoint.js"></script>
+    <script src="js/vendor.js"></script>
+
+
+    <script>
+        setTimeout(function() {
+            $("#loader1").show();
+        }, 1);
+        currentUserSP = loadUser();
+        statuses = loadStatuses();
+        times = loadWorkingHours();
+        presenceCodes = loadPresenceCodes();
+        nationalHolidays = loadNationalHolidays();
+        $.when(loadRequests("Supervisor", currentUserSP.ID)).done(function(data) {
+            requests = data;
+        });
+        // myUsers = loadMyEmployees(currentUserSP.ID); // issue with 500
+
+    </script>
+
+</head>
+
+<body>
+    <div id="loader1" class="loader"></div>
+
+    <div class="header-info-small">
+        No support for this resolution of the browser!
+    </div>
+
+
+    <div class="modal fade" id="modal-ticket-request" ng-controller="AddTicketRequestCtrl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="modal-header">
+                    <h3 class="modal-title">{{tr.title}}</h3>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        {{tr.body}}
+                    </p>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-10">
+                            <div class="form-group">
+                                <label for="">Wybierz problematyczny wniosek: </label>
+                                <select ng-model="TicketRequest" id="select-request-type" ng-model="valformsel" class="custom-select custom-select-lg">
+                                        <option ng-repeat="item in tr.rr" value="{{item.ID}}">{{"ID: " + item.ID + ", status: " + item.Status + ", " + item.StartDate + " - " + item.EndDate}}</option>
+                                    </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="col-lg-6 col-md-8 col-sm-12">
+                            <div class="form-group">
+                                <label for="">Opisz sytuacje problematycznego wniosku: </label>
+                                <textarea ng-model="TicketText" id="new-request-textarea-reason" name="reason-ticketu-wniosku" id="" cols="100" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <a href="#" ng-click="wyslijTicket()" class="btn btn-success" data-dismiss="modal">Wyślij info do Admina</a>
+                    <a href="#" class="btn btn-default" data-dismiss="modal">Zamknij</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="modal-special-request" ng-controller="AddSpecialRequestCtrl">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="modal-header">
+                    <h3 class="modal-title">{{sr.title}}</h3>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        {{sr.body}}
+                    </p>
+
+                    <div class="container">
+                        <div class="col-lg-4 col-md-6 col-sm-8">
+                            <div class="form-group">
+                                <label for="">Opisz sytuacje wniosku specjalnego: </label>
+                                <textarea ng-model="SRText" id="new-request-textarea-reason" name="reason-nowego-wniosku" cols="100" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <a href="#" ng-click="wyslijSpecialWniosekDoAkceptacji()" class="btn btn-success" data-dismiss="modal">Wyślij specjalny wniosek do akceptacji</a>
+                    <a href="#" class="btn btn-default" data-dismiss="modal">Zamknij</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!--NAVIGATION-->
+
+
+
+    <div id="myNavbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+                </button>
+            </div>
+
+
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
+
+                    <li><a href="#home"> <span class="fa fa-home fa-3x"></span> </a></li>
+                    <li><a href="#this-week-schedule"><span class="fas fa-clipboard-list fa-3x"></span></a> </li>
+                    <li><a href="#list"><span class="fa fa-list-ul fa-3x"></span></a> </li>
+                    <li></li>
+                    <li><a href="#help"><span class="fa fa-question fa-3x"></span></a> </li>
+                    <li></li>
+                    <li><a href="#" onclick="globalRefresh();"> <span class="fas fa-sync fa-3x"></span> </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!--- End Navigation ---->
+
+
+    <!--- Header --->
+    <div id="home" class="header" ng-controller="HeaderCtrl">
+        <div class="container" id="glider-start">
+            <div class="row">
+                <div class="col-lg-8 col-md-8">
+                    <div id="glider-gear">
+
+                    </div>
+
+
+                    <h1 id="h1-app-title">{{appDetails.title}} - Approver Interface <span class="fa fa-paper-plane"></span></h1>
+                    <p>
+                        {{appDetails.tagline}}
+                    </p>
+
+                    <div id="hr-logo">
+                        <a href="ecok.html" target="_blank"><img src="img/hrslogo.png" alt="hrslogo"></a>
+                    </div>
+
+
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="container bulb-right-quick-panel">
+
+                        <button class="btn btn-lg btn-warning" data-toggle="modal" data-target="#modal-special-request"><i class="fas fa-plus"></i> Dodaj specjalny wniosek </button>
+                        <br>
+                        <button class="btn btn-lg btn-danger" data-toggle="modal" data-target="#modal-ticket-request"><i class="fas fa-plus"></i> Zgłoś problem z już istniejącym wnioskiem </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div id="this-week-schedule" class="this-week-schedule" ng-controller="ThisWeekScheduleCtrl">
+        <h2>
+            {{wksch.title}} <span class="fas fa-clipboard-list"></span>
+        </h2>
+        <div class="container">
+
+            <button class="btn btn-info" ng-click="wksch.getPrevWeek()"> <i class="fas fa-arrow-left"></i> </button>
+            <h3 class="h3-for-wksch-form-to"> {{wksch.fromDate}} - {{wksch.toDate}} </h3>
+            <button class="btn btn-info" ng-click="wksch.getNextWeek()"> <i class="fas fa-arrow-right"></i> </button>
+
+            <div class="table100 ver1 m-b-110">
+                <table data-vertable="ver1">
+                    <thead>
+                        <tr class="row100 head">
+                            <th class="column100" data-column="column1">NM</th>
+                            <th class="column100" data-column="column2">MON <br> {{wksch.fromDate}}</th>
+                            <th class="column100" data-column="column3">TUE <br> {{wksch.getYYYYMMDDDate(2)}}</th>
+                            <th class="column100" data-column="column4">WED <br> {{wksch.getYYYYMMDDDate(3)}}</th>
+                            <th class="column100" data-column="column5">THU <br> {{wksch.getYYYYMMDDDate(4)}}</th>
+                            <th class="column100" data-column="column6">FRI <br> {{wksch.getYYYYMMDDDate(5)}}</th>
+                            <th class="column100" data-column="column7">SAT <br> {{wksch.getYYYYMMDDDate(6)}}</th>
+                            <th class="column100" data-column="column8">SUN <br> {{wksch.getYYYYMMDDDate(7)}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+                        <tr class="row100 {{item}}" ng-repeat="item in wksch.users">
+                            <td class="column100" data-column="column1">{{item}}</td>
+                            <td class="column100" data-column="column2">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.fromDate]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                            <td class="column100" data-column="column3">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.getYYYYMMDDDate(2)]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                            <td class="column100" data-column="column4">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.getYYYYMMDDDate(3)]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                            <td class="column100" data-column="column5">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.getYYYYMMDDDate(4)]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                            <td class="column100" data-column="column6">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.getYYYYMMDDDate(5)]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                            <td class="column100" data-column="column7">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.getYYYYMMDDDate(6)]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                            <td class="column100" data-column="column8">
+                                <div ng-repeat="r in wksch.matrix[item][wksch.getYYYYMMDDDate(7)]" class="{{wksch.parseObjectForStatus( r )}}" id="{{wksch.parseObjectForID( r )}}" ng-click="wksch.onClick(r)">
+                                    {{ wksch.parseObjectForInnerHTML( r ) }}
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+
+    <div id="list" class="list" ng-controller="ListCtrl">
+
+        <h2>{{ll.titleSupervisor}} <i class="fa fa-list-ul"></i></h2>
+
+        <ul class="lista">
+
+            <li>
+                <button id="list-show-more" ng-click="showMore()" class="btn btn-secondary"> <i class="fas fa-sort-amount-up"></i> Pokaż starsze... </button>
+            </li>
+
+
+            <li ng-repeat="item in ll.leanArrForSupervisor">
+                <div class="list-user-name">{{item.CreatedByName}}</div>
+                <div class="list-ajtem">{{covertCodeToSAPCode(item.RequestCodeSAP)}}</div>
+                <div class="item-description">{{covertCodeToDescription(item.RequestCodeSAP)}}</div><br>
+                <div class="item-status">Status: {{strStatus(item.Status)}}</div>
+                <div class="item-ajdi">id: {{item.ID}}</div>
+                <div class="time-t1">Start: {{item.StartDate.replace("Z","").replace("T"," T ")}}</div>
+                <div class="time-t2">Koniec: {{item.EndDate.replace("Z","").replace("T"," T ")}}</div>
+                <div class="item-reason">Opis: {{item.Reason}}</div>
+
+                <div class="btns-for-supervisor">
+                    <button ng-click="approve(item.ID)" type="button" class="btn btn-success" id="list-a-{{item.ID}}">Approve</button>
+                    <button ng-click="decline(item.ID)" type="button" class="btn btn-danger" id="list-d-{{item.ID}}">Decline</button>
+                </div>
+
+            </li>
+        </ul>
+
+        <div class="a-d-list">
+            <h3 class="wybrane-wnioski">
+                Wybrane wnioski do zatwierdzenia: {{ll.wybraneWnioski.toApprove}}, <br> wybrane wnioski do odrzucenia: {{ll.wybraneWnioski.toDecline}}
+            </h3>
+            <button ng-click="sendDecision()" class="btn btn-lg btn-primary send-decision">Wyślij</button>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+    <div id="help " class="help" ng-controller="HelpCtrl ">
+        <h2>
+            {{h.title}} <span class="fa fa-life-ring "></span>
+        </h2>
+
+        <div class="container help-it-guys ">
+            <ul>
+                <li ng-repeat="item in h.itGuys ">
+                    <div class="nm ">{{item.name}}</div>
+                    <div class="mail ">{{item.mail}} <a href="mailto:{{item.mail}}?Subject=OVT.Bulb.Support.Ticket "><span class="fa fa-envelope "></span></a></div>
+                    <div class="phone ">{{item.phone}}</div>
+                    <div class="mobile ">{{item.mobile}}</div>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+
+    <script src="js/timeline-vendor.js "></script>
+    <script src="js/date-picker-handler.js "></script>
+    <script src="js/bootstrap.min.js "></script>
+    <script src="js/bootstrap-datetimepicker.min.js "></script>
+    <script src="js/onload-ta.js "></script>
+    
+    
+    
+    <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
+    <script src="js/angular-animate.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/ng-comp/ng-head-foot/head-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/startup-ctrl.js"></script>
+    <script src="js/ng-comp/ng-head-foot/shared-ctrl.js"></script>
+
+
+    
+
+</body>
+
+</html>

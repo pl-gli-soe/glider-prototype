@@ -1,0 +1,213 @@
+/* TIMELINE */
+
+.timeline {
+    min-height: 100vh;
+    height: 100%;
+    padding: 70px 40px 40px;
+    background: -webkit-gradient(linear, right top, left top, from(#fff), to(#dfdce3));
+    background: linear-gradient(-90deg, #fff, #dfdce3);
+    position: relative;
+}
+
+.timeline button {
+    float: none;
+}
+
+.bulb-timeline {
+    margin: 40px 240px;
+    height: 90%;
+    color: black;
+
+}
+
+
+.bulb-timeline .add-button {
+    position: absolute;
+    right: 300px;
+    top: 90px;
+
+}
+
+.bulb-timeline .show-more-button {
+    position: absolute;
+    right: 300px;
+    top: 150px;
+}
+
+
+.bulb-timeline ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.bulb-timeline ul:before {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 0px;
+    height: 100%;
+    border: 3px dashed black;
+}
+
+.bulb-timeline ul li {
+    margin: 60px;
+    margin-right: 80px;
+    display: block;
+    position: relative;
+    border: 1px dashed black;
+
+    transition: font-size 0.8s;
+
+
+    background: linear-gradient(-90deg, #fff, #dfdce3);
+
+}
+
+.bulb-timeline ul li:hover {
+    font-size: 15px;
+    border: 1px solid black;
+    padding: 0 10px 0;
+    cursor: pointer;
+
+    background: linear-gradient(90deg, #fff, #dfdce3);
+}
+
+.bulb-timeline ul .bulb-timeline-sz-1 {
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-1:hover {
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-2 {
+
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-2:hover {
+
+    padding-top: 60px;
+    padding-bottom: 60px;
+}
+
+.bulb-timeline ul li .first {
+    font-weight: bold;
+    margin: 10px;
+}
+
+
+
+
+.bulb-timeline ul li > span {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: -60px;
+    width: 0px;
+    height: 80%;
+    border: 3px solid black;
+    vertical-align: middle; // ?
+}
+
+.bulb-timeline ul li > span:before,
+.bulb-timeline ul li > span:after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #bbb;
+    position: absolute;
+    border-radius: 50%;
+    background-color: white;
+
+}
+
+
+.bulb-timeline ul .bulb-timeline-sz-1 > span:before {
+    top: -7px;
+    left: -10px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-1 > span:after {
+    top: 80%;
+    left: -10px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-2 > span:before {
+    top: -7px;
+    left: -10px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-2 > span:after {
+    top: 100%;
+    left: -10px;
+}
+
+
+.bulb-timeline ul li .time span {
+    position: absolute;
+    left: -150px;
+    width: 30px;
+    text-align: right;
+    color: gray;
+    font-weight: bold;
+}
+
+.bulb-timeline ul li .time .t1 {
+
+    top: -10%;
+    font-size: 11px;
+
+}
+
+.bulb-timeline ul li .time .t2 {
+
+    top: 60%;
+    font-size: 11px;
+}
+
+.bulb-timeline ul .bulb-timeline-sz-2 .time .t2 {
+
+    top: 80%;
+    font-size: 11px;
+}
+
+.bulb-timeline .bulb-timeline-sz-1 .third {
+    font-weight: bold;
+    font-size: 17px;
+    position: absolute;
+    top: -30px;
+    left: -240px;
+}
+
+.bulb-timeline .bulb-timeline-sz-2 .third {
+    font-weight: bold;
+    font-size: 17px;
+    position: absolute;
+    top: -30px;
+    left: -240px;
+}
+
+.bulb-timeline .bulb-timeline-sz-1 .fourth {
+    font-weight: bold;
+    font-size: 17px;
+    position: absolute;
+    top: 50px;
+    left: -240px;
+}
+
+.bulb-timeline .bulb-timeline-sz-2 .fourth {
+    font-weight: bold;
+    font-size: 17px;
+    position: absolute;
+    top: 160px;
+    left: -240px;
+}

@@ -1,0 +1,65 @@
+﻿.zmniejsz-szerokosc {
+    width: 200px;
+}
+
+.form-group {
+    font-size: 24px;
+    margin: 10px;
+}
+
+
+#datetimepicker1 {
+    width: 200px;
+}
+
+#datetimepicker2 {
+    width: 200px;
+}
+
+
+#edatetimepicker1 {
+    width: 200px;
+}
+
+#edatetimepicker2 {
+    width: 200px;
+}
+
+.od-do {
+	
+	font-size: 40%;
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+
+.my-container-for-datetimepicker {
+    all: unset;
+}
+
+
+.add-new-req-quick-buttons-for-hours, .add-new-req-quick-buttons-for-days {
+	display:inline-table;
+	padding:2px;
+}
+
+.add-new-req-quick-buttons-for-hours button,
+.add-new-req-quick-buttons-for-days button {
+	display:inline;
+	width: 80px;
+	font-size: 70%;
+}
+
+.add-new-req-quick-buttons-for-hours .kreska,
+.add-new-req-quick-buttons-for-days .kreska {
+	display:inline;
+	width: 40px;
+	font-size: 70%;
+}
+
+.add-new-req-quick-buttons-for-hours .desc,
+.add-new-req-quick-buttons-for-days .desc {
+	display:inline;
+	width: 235px;
+	font-size: 70%;
+}
